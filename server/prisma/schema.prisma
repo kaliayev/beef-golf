@@ -1,0 +1,171 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model club {
+  id         Int          @id @default(autoincrement())
+  key        String
+  name       String
+  golferClub golferClub[]
+  strokeLog  strokeLog[]
+}
+
+model course {
+  id           Int       @id @default(autoincrement())
+  name         String
+  description  String?
+  date_created DateTime
+  date_updated DateTime?
+  hole         hole[]
+  round        round[]
+}
+
+model golfer {
+  id               Int                @id @default(autoincrement())
+  name             String
+  date_created     DateTime
+  date_updated     DateTime?
+  golferClub       golferClub[]
+  scoreCard        scoreCard[]
+  scoreCardHole    scoreCardHole[]
+  scoreCardMatchup scoreCardMatchup[]
+  strokeLog        strokeLog[]
+}
+
+model golferClub {
+  golfer_id    Int
+  club_id      Int
+  in_bag       Boolean     @default(true)
+  distance     Int
+  date_created DateTime
+  date_updated DateTime?
+  club         club        @relation(fields: [club_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  golfer       golfer      @relation(fields: [golfer_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  strokeLog    strokeLog[]
+
+  @@id([golfer_id, club_id])
+}
+
+model hole {
+  id             Int             @id @default(autoincrement())
+  course_id      Int
+  hole_number    Int
+  name           String?
+  description    String?
+  handicap       Int
+  par            Int
+  red_distance   Int?
+  green_distance Int?
+  white_distance Int?
+  blue_distance  Int?
+  black_distance Int?
+  date_created   DateTime
+  date_updated   DateTime?
+  course         course          @relation(fields: [course_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  scoreCardHole  scoreCardHole[]
+  strokeLog      strokeLog[]
+}
+
+model matchup {
+  id               Int                @id @default(autoincrement())
+  match_type       Int
+  date_created     DateTime
+  date_updated     DateTime?
+  scoreCardMatchup scoreCardMatchup[]
+}
+
+model round {
+  id               Int                @id @default(autoincrement())
+  description      String?
+  course_id        Int
+  date_created     DateTime
+  date_updated     DateTime?
+  course           course             @relation(fields: [course_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  scoreCard        scoreCard[]
+  scoreCardHole    scoreCardHole[]
+  scoreCardMatchup scoreCardMatchup[]
+  strokeLog        strokeLog[]
+}
+
+model scoreCard {
+  round_id         Int
+  golfer_id        Int
+  beef_week        Int?
+  date_created     DateTime
+  date_updated     DateTime?
+  golfer           golfer             @relation(fields: [golfer_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  round            round              @relation(fields: [round_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  scoreCardHole    scoreCardHole[]
+  scoreCardMatchup scoreCardMatchup[]
+  strokeLog        strokeLog[]
+
+  @@id([round_id, golfer_id])
+}
+
+model scoreCardHole {
+  round_id     Int
+  golfer_id    Int
+  hole_id      Int
+  strokes      Int
+  putts        Int?
+  drops        Int?
+  penalties    Int?
+  obs          Int?
+  date_created DateTime
+  date_updated DateTime?
+  hole         hole        @relation(fields: [hole_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  scoreCard    scoreCard   @relation(fields: [round_id, golfer_id], references: [round_id, golfer_id], onDelete: NoAction, onUpdate: NoAction)
+  golfer       golfer      @relation(fields: [golfer_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  round        round       @relation(fields: [round_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  strokeLog    strokeLog[]
+
+  @@id([round_id, golfer_id, hole_id])
+}
+
+model scoreCardMatchup {
+  round_id     Int
+  golfer_id    Int
+  matchup_id   Int
+  score        Int
+  date_created DateTime
+  date_updated DateTime?
+  matchup      matchup   @relation(fields: [matchup_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  scoreCard    scoreCard @relation(fields: [round_id, golfer_id], references: [round_id, golfer_id], onDelete: NoAction, onUpdate: NoAction)
+  golfer       golfer    @relation(fields: [golfer_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  round        round     @relation(fields: [round_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@id([round_id, golfer_id, matchup_id])
+}
+
+model strokeLog {
+  round_id           Int
+  golfer_id          Int
+  hole_id            Int
+  club_id            Int
+  stroke_number      Int
+  golfer_club_id     Int?
+  distance           Int?
+  make               Boolean       @default(false)
+  max_strokes_pickup Boolean       @default(false)
+  penalty_stroke     Boolean       @default(false)
+  direction          Int?
+  latitude           Float?
+  longitude          Float?
+  altitude           Float?
+  date_created       DateTime
+  date_updated       DateTime?
+  scoreCardHole      scoreCardHole @relation(fields: [round_id, golfer_id, hole_id], references: [round_id, golfer_id, hole_id], onDelete: NoAction, onUpdate: NoAction)
+  scoreCard          scoreCard     @relation(fields: [round_id, golfer_id], references: [round_id, golfer_id], onDelete: NoAction, onUpdate: NoAction)
+  golferClub         golferClub    @relation(fields: [golfer_id, club_id], references: [golfer_id, club_id], onDelete: NoAction, onUpdate: NoAction)
+  club               club          @relation(fields: [club_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  hole               hole          @relation(fields: [hole_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  golfer             golfer        @relation(fields: [golfer_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  round              round         @relation(fields: [round_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@id([round_id, golfer_id, hole_id, stroke_number])
+}

@@ -1,0 +1,23 @@
+{
+  "name": "beef-golf",
+  "version": "0.1.0-SNAPSHOT",
+  "description": "Golf scoring and stoke tracking react app and server for beef matchups and season",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kaliayev/beef-golf.git"
+  },
+  "keywords": [
+    "golf",
+    "shot-tracking"
+  ],
+  "author": "Calin Fraser",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/kaliayev/beef-golf/issues"
+  },
+  "homepage": "https://github.com/kaliayev/beef-golf#readme"
+}
