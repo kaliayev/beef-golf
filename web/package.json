@@ -1,0 +1,45 @@
+{
+  "name": "beef-golf-web",
+  "version": "1.0.0",
+  "description": "Beef Golf Web",
+  "private": true,
+  "dependencies": {
+    "@emotion/react": "^11.10.8",
+    "@emotion/styled": "^11.10.8",
+    "@fontsource/roboto": "^4.5.8",
+    "@mui/icons-material": "^5.11.16",
+    "@mui/material": "^5.12.3",
+    "@mui/x-data-grid": "^6.3.0",
+    "@mui/x-date-pickers": "^6.3.0",
+    "axios": "^1.4.0",
+    "chart.js": "^4.4.0",
+    "cors": "^2.8.5",
+    "dayjs": "^1.11.7",
+    "react": "^18.2.0",
+    "react-chartjs-2": "^5.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.14.0",
+    "react-scripts": "5.0.1"
+  },
+    "scripts": {
+        "start": "react-scripts start",
+        "build": "BUILD_PATH='../server/public react-scripts build"
+    },
+  "eslintConfig": {
+    "extends": [
+      "react-app"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}
