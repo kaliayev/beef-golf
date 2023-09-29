@@ -40,11 +40,10 @@ export default function HoleEdit(props) {
     const {round, holeNumber} = useLoaderData();
     const playedHoles = []; // TODO: this comes from loader
     const golfers = round.scoreCard.map(s => s.golfer)
-    console.log();
     const holeDetails = round.course.hole[holeNumber -1];
-
-    const [caddyOpen, setCaddyOpen] = useState(false);
-    const [selectedGolfer, setSelectedGolfer] = useState(golfers[0]);
+    
+    const [selectedGolfer, setSelectedGolfer] = useState({});
+    console.log("selected golfer", selectedGolfer)
     const [selectedGolferClubs, setSelectedGolferClubs] = useState(["Driver", "3 Wood", "5 Wood", "3 Iron", "4 Iron", "5 Iron", "6 Iron", "7 Iron", "8 Iron", "9 Iron", "Pitching Wedge", "Sand Wedge", "Lob Wedge", "Putter"]);
     const [selectedGolferClub, setSelectedGolferClub] = useState("Driver");
     const [outcome, setOutcome] = useState('');
@@ -53,11 +52,11 @@ export default function HoleEdit(props) {
 
     const selectTrackingIcon = () => {
         switch (outcome) {
-            case "Make":
+            case "Green":
                 return <GolfHole style={{fontSize: 40}} color={"success"}/>
             case "Penalty":
                 return <Water style={{fontSize: 40}} color={"warning"}/>
-            case "Max Score":
+            case "Pickup":
                 return <ErrorIcon style={{fontSize: 40}} color={"error"}/>
             default:
                 return <GolfTee style={{fontSize: 40}}/>
@@ -156,7 +155,7 @@ export default function HoleEdit(props) {
                             <Typography sx={{color: 'text.secondary' }}>OR</Typography>
                             <Autocomplete fullWidth
                                           renderInput={(params) => <TextField {...params} label="Select Event" />}
-                                          options={['Make', 'Penalty', 'Max Score']}
+                                          options={['Green', 'Penalty', 'Pickup']}
                                           onChange={(event, value) => setOutcome(value)}
                             />
                         </Stack>
@@ -168,25 +167,26 @@ export default function HoleEdit(props) {
                     </AccordionDetails>
                 </Accordion>
 
-                <Box align="right">
-                    <Fab color="primary"
-                         sx={{}}
-                         onClick={e => setCaddyOpen(true)}>
-                        <Caddy style={{fontSize: 40}} />
-                    </Fab>
-                </Box>
-                <Drawer anchor={"bottom"} open={caddyOpen} onSelect={(event) => setCaddyOpen(true)} onClose={e => setCaddyOpen(false)}>
-                    <Stack sx={{width: '70%', m:2}}
-                         spacing={2}>
-                        <Autocomplete
-                            getOptionLabel={(option) => option.name}
-                            renderInput={(params) => <TextField {...params} label="Golfer" />}
-                            options={golfers}
-                            onChange={(event, value) => setSelectedGolfer(value)}/>
-                        <Typography sx={{color: 'text.secondary' }}>{`Distance: ${calculateDistance()}`}</Typography>
-                        <Typography sx={{color: 'text.secondary' }}>{`Recommended Club: ${recommendClub()}`}</Typography>
-                    </Stack>
-                </Drawer>
+                <Accordion sx={{backgroundColor: colours.background}}>
+                    <AccordionSummary expandIcon={<ExpandMore color={"secondary"}/>}>
+                        <Typography sx={{ width: '33%', flexShrink: 0 }}>
+                            {`Caddy`}
+                        </Typography>
+                        <Typography sx={{ color: 'text.secondary' }}>{selectedGolfer.name}</Typography>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                        <Stack sx={{width: '70%', m:2}}
+                               spacing={2}>
+                            <Autocomplete
+                                getOptionLabel={(option) => option.name}
+                                renderInput={(params) => <TextField {...params} label="Golfer" />}
+                                options={golfers}
+                                onChange={(event, value) => setSelectedGolfer(value)}/>
+                            <Typography sx={{color: 'text.secondary' }}>{`Distance: ${calculateDistance()}`}</Typography>
+                            <Typography sx={{color: 'text.secondary' }}>{`Recommended Club: ${recommendClub()}`}</Typography>
+                        </Stack>
+                    </AccordionDetails>
+                </Accordion>
             </Stack>
         </Box>
     )
