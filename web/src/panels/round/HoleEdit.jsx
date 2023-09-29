@@ -18,21 +18,37 @@ import GolfHole from '@mui/icons-material/GolfCourseTwoTone';
 import GolfTee from '@mui/icons-material/SportsGolfTwoTone';
 import ErrorIcon from '@mui/icons-material/ErrorTwoTone';
 import {getGeo} from "../../data/geo";
+import {getCourse} from "../../data/courses";
+import {getRound} from "../../data/rounds";
+import {useLoaderData} from "react-router-dom";
 
 let colours = Constants.colours;
+const getPathParams = (request) => {
+    const pathParams = new URL(request.url).pathname.split('/')
+    return {
+        roundId: Number(pathParams[2]),
+        holeNumber: Number(pathParams[4])
+    }
+}
+export async function loader({request}) {
+    const {roundId, holeNumber} = getPathParams(request);
 
+    const round = await getRound(roundId);
+    return {round, holeNumber};
+}
 export default function HoleEdit(props) {
-    const holeNumber = 1; // TODO: this comes from loader
+    const {round, holeNumber} = useLoaderData();
     const playedHoles = []; // TODO: this comes from loader
-    const golfers = ['Kaliayev', 'Bish']; // TODO: this comes from loader
-    const holeDetails = {name: "Magnetic Hollow", par: 4, handicap: 1, distance: 300, description: "A whole bunch of madeup nonsense"}; // TODO: this comes from loader
+    const golfers = round.scoreCard.map(s => s.golfer)
+    console.log();
+    const holeDetails = round.course.hole[holeNumber -1];
 
     const [caddyOpen, setCaddyOpen] = useState(false);
-    const [selectedGolfer, setSelectedGolfer] = useState("Kaliayev");
+    const [selectedGolfer, setSelectedGolfer] = useState(golfers[0]);
     const [selectedGolferClubs, setSelectedGolferClubs] = useState(["Driver", "3 Wood", "5 Wood", "3 Iron", "4 Iron", "5 Iron", "6 Iron", "7 Iron", "8 Iron", "9 Iron", "Pitching Wedge", "Sand Wedge", "Lob Wedge", "Putter"]);
     const [selectedGolferClub, setSelectedGolferClub] = useState("Driver");
     const [outcome, setOutcome] = useState('');
-    const [distance, setDistance] = useState(holeDetails.distance);
+    const [distance, setDistance] = useState(holeDetails.white_distance);
     const [strokeNumber, setStrokeNumber] = useState(1);
 
     const selectTrackingIcon = () => {
@@ -95,7 +111,7 @@ export default function HoleEdit(props) {
                         <Typography sx={{ width: '33%', flexShrink: 0 }}>
                             Details
                         </Typography>
-                        <Typography sx={{ color: 'text.secondary' }}>{`Par ${holeDetails.par}, ${holeDetails.distance} Yards`}</Typography>
+                        <Typography sx={{ color: 'text.secondary' }}>{`Par ${holeDetails.par}, ${holeDetails.white_distance} Yards`}</Typography>
                     </AccordionSummary>
                     <AccordionDetails>
                         <Box align={"left"}>
@@ -109,12 +125,12 @@ export default function HoleEdit(props) {
                         <Typography sx={{ width: '33%', flexShrink: 0 }}>
                             {`Golfers`}
                         </Typography>
-                        <Typography sx={{ color: 'text.secondary' }}>{golfers.join(', ')}</Typography>
+                        <Typography sx={{ color: 'text.secondary' }}>{golfers.map(g => g.name).join(', ')}</Typography>
                     </AccordionSummary>
 
                     <AccordionDetails>
                         <Stack direction={"column"} spacing={2}>
-                            {golfers.map((golfer, index) => golferRow(golfer, index))}
+                            {golfers.map((golfer, index) => golferRow(golfer.name, index))}
                         </Stack>
                     </AccordionDetails>
                 </Accordion>
@@ -124,7 +140,7 @@ export default function HoleEdit(props) {
                         <Typography sx={{ width: '33%', flexShrink: 0 }}>
                             Tracking
                         </Typography>
-                        <Typography sx={{ color: 'text.secondary' }}>{selectedGolfer}</Typography>
+                        <Typography sx={{ color: 'text.secondary' }}>{selectedGolfer.name}</Typography>
                     </AccordionSummary>
                     <AccordionDetails>
                         <Stack direction={"column"} spacing={2}>
@@ -163,6 +179,7 @@ export default function HoleEdit(props) {
                     <Stack sx={{width: '70%', m:2}}
                          spacing={2}>
                         <Autocomplete
+                            getOptionLabel={(option) => option.name}
                             renderInput={(params) => <TextField {...params} label="Golfer" />}
                             options={golfers}
                             onChange={(event, value) => setSelectedGolfer(value)}/>

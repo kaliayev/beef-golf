@@ -19,18 +19,19 @@ const createStrokeLog = async (req, res) => {
             max_strokes_pickup: req.body.max_strokes_pickup,
             penalty_stroke: req.body.penalty_stroke,
             direction: req.body.direction,
-            geoLocations: [
-                req.body.geoLocations.map(geoLocation => {
-                    return {
-                        latitude: geoLocation.latitude,
-                        longitude: geoLocation.longitude,
-                        accuracy: geoLocation.accuracy,
-                        altitude: geoLocation.altitude,
-                        altitude_accuracy: geoLocation.altitude_accuracy,
-                        date_created: date_created,
-                    }
-                })
-            ]
+            geoLocation: {
+                create:
+                    req.body.geoLocations.map(geoLocation => {
+                        return {
+                            latitude: geoLocation.latitude,
+                            longitude: geoLocation.longitude,
+                            accuracy: geoLocation.accuracy,
+                            altitude: geoLocation.altitude,
+                            altitude_accuracy: geoLocation.altitude_accuracy,
+                            date_created: date_created,
+                        }
+                    })
+                }
         }
     })
     return res.status(201).json(strokeLog);

@@ -4,7 +4,6 @@ const log = require('../logging/log');
 const authMiddleware = (req, res, next) => {
     let authToken = req.get("Authorization")
     if (authToken) {
-        log.info("incoming request with token")
         authToken = authToken.slice(7);
         try {
             let verified = jwt.verify(authToken, config.JWT_SECRET);

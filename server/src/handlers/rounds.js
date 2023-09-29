@@ -26,13 +26,15 @@ const getRoundById = async (req, res) => {
     const round = await prisma.round.findUnique({
         where: {id: roundId},
         include: {
+            course: {
+                include: {
+                    hole: true
+                }
+            },
             scoreCard: {
                 include: {
-                    scoreCardHole: {
-                        include: {
-                            hole: true
-                        }
-                    }
+                    golfer: true,
+                    scoreCardHole: true
                 }
             }
         }

@@ -13,19 +13,37 @@ import {useState} from "react";
 import GolfTee from '@mui/icons-material/SportsGolfTwoTone';
 import Constants from "../../constants";
 import {ExpandMore} from "@mui/icons-material";
+import {getCourses} from "../../data/courses";
+import {getGolfers} from "../../data/golfers";
+import {useLoaderData, useNavigate} from "react-router-dom";
+import {createRound} from "../../data/rounds";
 
 let colours = Constants.colours;
 
+export async function loader() {
+    let courses = await getCourses();
+    let golfers = await getGolfers();
+    return {courses, golfers};
+}
+
 export default function RoundSetup(props) {
-    const [courses, setCourses] = useState(["Fredericton Golf Club", "Kingswood Golf Club", "Mactaquac Golf Club"]);
-    const [course, setCourse] = useState("Fredericton Golf Club");
-    const [allGolfers, setAllGolfers] = useState(["Kaliayev", "Bish", "Noah", "Jimmy"]);
+    let {courses, golfers} = useLoaderData();
+    const navigate = useNavigate();
+    const [course, setCourse] = useState(courses[0]);
     const [selectedGolfers, setSelectedGolfers] = useState([]);
     const [matchType, setMatchType] = useState("");
     const [matchTypes, setMatchTypes] = useState(["Match Play", "Stroke Play", "Skins", "Best Ball", "Scramble", "Alternate Shot", "Stableford", "Nassau", "Wolf", "Ryder Cup", "Other"]);
     const [isBeefNight, setIsBeefNight] = useState(false);
 
-    // TODO: add useEffect to get courses from database
+    const handleSubmit = async () => {
+        // create round
+        let round = await createRound({
+            "course_id": course.id,
+            "golfers": selectedGolfers.map(g => {return {golfer_id: g.id}}),
+        })
+        // navigate to new round
+        navigate(`/round/${round.id}/hole/1`)
+    }
 
     return (
         <Box sx={{
@@ -48,8 +66,8 @@ export default function RoundSetup(props) {
                 <FormControl fullWidth>
                     <InputLabel id="course-select-label">Select Course</InputLabel>
                     <Select id = "course-select" labelId="course-select-label" label="Select Course"
-                    value={course} onChange={(event) => setCourse(event.target.value)}>
-                        {courses.map((c, index) => <MenuItem sx={{justifyContent: 'center'}} key={index} value={c}>{c}</MenuItem>)}
+                    value={course.name} onChange={(event) => setCourse(event.target.value)}>
+                        {courses.map((c, index) => <MenuItem sx={{justifyContent: 'center'}} key={index} value={c.name}>{c.name}</MenuItem>)}
                     </Select>
                 </FormControl>
 
@@ -58,15 +76,15 @@ export default function RoundSetup(props) {
                         <Typography sx={{ width: '33%', flexShrink: 0 }}>
                             {selectedGolfers.length} Golfers
                         </Typography>
-                        <Typography sx={{ color: 'text.secondary' }}>{selectedGolfers.join(", ")}</Typography>
+                        <Typography sx={{ color: 'text.secondary' }}>{selectedGolfers.map(g => g.name).join(", ")}</Typography>
                     </AccordionSummary>
                     <AccordionDetails>
                         <Autocomplete
                             multiple
-                            getOptionLabel={(option) => option}
+                            getOptionLabel={(option) => option.name}
                             filterSelectedOptions
                             renderInput={(params) => <TextField {...params} label="Golfers" />}
-                            options={allGolfers}
+                            options={golfers}
                             onChange={(event, value) => setSelectedGolfers(value)}/>
                     </AccordionDetails>
                 </Accordion>
@@ -90,7 +108,9 @@ export default function RoundSetup(props) {
                 </Accordion>
 
                 <Stack justifyContent={"right"} direction="row">
-                    <IconButton><GolfTee style={{fontSize: 50}} color={"success"}/></IconButton>
+                    <IconButton onClick={handleSubmit} onSubmit={handleSubmit}>
+                        <GolfTee style={{fontSize: 50}} color={"success"}/>
+                    </IconButton>
                 </Stack>
             </Stack>
         </Box>

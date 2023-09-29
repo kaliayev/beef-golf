@@ -1,6 +1,6 @@
 import {AppBar, Box, Stack, Tab, Tabs, Toolbar} from "@mui/material";
 import {useState} from "react";
-//import {login, logout} from "../data/entities";
+import {login, logout} from "../data/login";
 import GolfTee from '@mui/icons-material/SportsGolfTwoTone';
 import GolfCourse from '@mui/icons-material/GolfCourseTwoTone';
 import Golfer from '@mui/icons-material/PermIdentityTwoTone';
@@ -8,6 +8,7 @@ import Stats from '@mui/icons-material/InsertChartTwoTone';
 import Login from "./Login";
 import RoundSetup from "../panels/round/RoundSetup";
 import HoleEdit from "../panels/round/HoleEdit";
+import RoundRouterBuilder from "../panels/round/RoundRouter";
 
 function CustomTabPanel(props) {
     const { children, value, index, ...other } = props;
@@ -32,10 +33,10 @@ export default function RootTabs() {
         setTabVal(newValue);
     };
 
-    const [isLoggedIn, setIsLoggedIn] = useState(true);
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
     const onLogin = async (username, password) => {
         try {
-            //await login(username, password);
+            await login(username, password);
             setIsLoggedIn(true);
         } catch (e) {
             setIsLoggedIn(false);
@@ -43,14 +44,13 @@ export default function RootTabs() {
         }
     }
     const onLogout = async () => {
-        //await logout();
+        await logout();
         setIsLoggedIn(false);
-
     }
     let auth = [isLoggedIn, {onLogout, onLogin, setIsLoggedIn}]
 
     const tabPanelData = [
-        {label: "Start Round", icon: <GolfTee fontSize="large"/>, page: <HoleEdit/>},
+        {label: "Start Round", icon: <GolfTee fontSize="large"/>, page: RoundRouterBuilder({auth})},
         {label: "Courses", icon: <GolfCourse fontSize="large"/>, page: <div/>},
         {label: "Golfers", icon: <Golfer fontSize="large"/>, page: <div/>},
         {label: "Stats", icon: <Stats fontSize="large"/>, page: <div/>}]

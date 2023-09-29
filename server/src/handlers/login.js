@@ -6,7 +6,6 @@ const passhash =  config.LOGIN_PASS_HASH;
 
 const login = (req, res) => {
     let {password} = req.body;
-    log.info(`login attempt with password ${password}`)
     let {extendedToken} = req.query;
     try {
         if (bcrypt.compareSync(password, passhash)) {
