@@ -10,3 +10,8 @@ export async function getRound(roundId) {
     let response = await axios.get(`/rounds/${roundId}`);
     return response.data;
 }
+
+export async function getRounds() {
+    let response = await axios.get(`/rounds`);
+    return response.data;
+}

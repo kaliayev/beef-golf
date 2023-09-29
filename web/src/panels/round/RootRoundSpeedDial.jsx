@@ -13,6 +13,8 @@ export default function RootRoundSpeedDial({auth}) {
     const navigate = useNavigate();
     const {round_id, hole_id} = useParams();
     const holeNum = parseInt(hole_id);
+    const nextHoleNum = (holeNum === 18)? 1 : holeNum + 1;
+    const lastHoleNum = (holeNum === 1)? 18 : holeNum - 1;
     const [searchParams, setSearchParams] = useSearchParams();
     // useAuth
     const [isLoggedIn, {onLogout, onLogin, setIsLoggedIn}] = auth;
@@ -21,8 +23,8 @@ export default function RootRoundSpeedDial({auth}) {
     const handleClose = () => setOpen(false);
 
     const actions = [
-        {icon: <Backwards color={"warning"} fontSize="large"/>, name: 'Last Hole', click: () => {handleClose(); navigate(`/rounds/${round_id}/holes/${holeNum - 1}`)}},
-        {icon: <Forwards color={"success"} fontSize="large"/>, name: 'Next Hole', click: () => {handleClose(); navigate(`/rounds/${round_id}/holes/${holeNum + 1}`)}},
+        {icon: <Backwards color={"warning"} fontSize="large"/>, name: 'Last Hole', click: () => {handleClose(); navigate(`/rounds/${round_id}/holes/${lastHoleNum}`)}},
+        {icon: <Forwards color={"success"} fontSize="large"/>, name: 'Next Hole', click: () => {handleClose(); navigate(`/rounds/${round_id}/holes/${nextHoleNum}`)}},
         {icon: <Caddy color={"info"} fontSize="large"/>, name: 'Caddy', click: () => {handleClose();}},
         {icon: <FinishRound color={"success"} fontSize="large"/>, name: 'Finish', click: () => {handleClose();}},
     ];

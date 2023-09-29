@@ -1,17 +1,17 @@
 import {
     Accordion,
     AccordionDetails,
-    AccordionSummary, Autocomplete,
+    AccordionSummary, Alert, Autocomplete,
     Box, Button, Divider,
     Drawer,
-    Fab, IconButton,
+    Fab, IconButton, Snackbar,
     Stack,
     TextField,
     Typography
 } from "@mui/material";
 import {Cancel, ExpandMore} from "@mui/icons-material";
 import Constants from "../../constants";
-import {useEffect, useRef, useState} from "react";
+import {Fragment, useEffect, useRef, useState} from "react";
 import Caddy from '@mui/icons-material/PsychologyAltTwoTone';
 import Water from '@mui/icons-material/PoolTwoTone';
 import GolfHole from '@mui/icons-material/GolfCourseTwoTone';
@@ -59,6 +59,26 @@ export default function HoleEdit(props) {
     const [currGeolocation, setCurrGeolocation] = useState({});
     const [isTracking, setIsTracking] = useState(false);
     const [selectedGolferStrokes, setSelectedGolferStrokes] = useState([]);
+    const [error, setError] = useState(null);
+    const [snackbarOpen, setSnackbarOpen] = useState(false);
+
+    const handleSnackbarClose = (event, reason) => {
+        if (reason === 'clickaway') {
+            return;
+        }
+        setSnackbarOpen(false);
+    };
+    const snackbarAction = (<Fragment>
+        <Button color="secondary" size="small" onClick={handleSnackbarClose}/>
+        <IconButton
+            size="small"
+            aria-label="close"
+            color="inherit"
+            onClick={handleSnackbarClose}
+        >
+            <Cancel fontSize="small" />
+        </IconButton>
+    </Fragment>)
     const selectTrackingIcon = () => {
         switch (outcome) {
             case "Green":
@@ -98,21 +118,26 @@ export default function HoleEdit(props) {
             setIsTracking(false);
             console.log("outcome", outcome)
             // send stroke data to server
-            let stroke = await createStrokeLog({
-                round_id: round.id,
-                hole_id: holeDetails.id,
-                golfer_id: selectedGolfer.id,
-                stroke_number: getStrokeNumber(selectedGolferStrokes),
-                club_id: selectedGolferClub.id,
-                green: outcome === "Green",
-                penalty: outcome === "Penalty",
-                pickup: outcome === "Pickup",
-                geoLocations
-            })
-            // update and clear other details
-            setGeoLocations([]);
-            setSelectedGolferStrokes([...selectedGolferStrokes, stroke]);
-            setOutcome('');
+            try {
+                let stroke = await createStrokeLog({
+                    round_id: round.id,
+                    hole_id: holeDetails.id,
+                    golfer_id: selectedGolfer.id,
+                    stroke_number: getStrokeNumber(selectedGolferStrokes),
+                    club_id: selectedGolferClub.id,
+                    green: outcome === "Green",
+                    penalty: outcome === "Penalty",
+                    pickup: outcome === "Pickup",
+                    geoLocations
+                })
+                // update and clear other details
+                setGeoLocations([]);
+                setSelectedGolferStrokes([...selectedGolferStrokes, stroke]);
+                setOutcome('');
+            } catch (e) {
+                setError("Error Saving Stroke Log");
+                setSnackbarOpen(true);
+            }
         } else {
             // should always have a value to start, and resets geolocations to new array
             setGeoLocations([currGeolocation]);
@@ -283,6 +308,13 @@ export default function HoleEdit(props) {
                 </Box>
                 </Box>
             </Stack>
+            <Snackbar
+                open={snackbarOpen}
+                action={snackbarAction}
+                onClose={handleSnackbarClose}
+                autoHideDuration={5000}>
+                <Alert severity="error" sx={{width: '100%'}} onClose={handleSnackbarClose}> {error} </Alert>
+            </Snackbar>
         </Box>
     )
 }

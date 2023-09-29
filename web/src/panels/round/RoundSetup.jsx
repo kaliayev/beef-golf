@@ -1,6 +1,6 @@
 import {
     Accordion, AccordionDetails, AccordionSummary, Autocomplete,
-    Box,
+    Box, Button, Divider,
     FormControl, FormControlLabel,
     IconButton,
     InputLabel,
@@ -16,7 +16,7 @@ import {ExpandMore} from "@mui/icons-material";
 import {getCourses} from "../../data/courses";
 import {getGolfers} from "../../data/golfers";
 import {useLoaderData, useNavigate} from "react-router-dom";
-import {createRound} from "../../data/rounds";
+import {createRound, getRounds} from "../../data/rounds";
 
 let colours = Constants.colours;
 
@@ -34,6 +34,12 @@ export default function RoundSetup(props) {
     const [matchType, setMatchType] = useState("");
     const [matchTypes, setMatchTypes] = useState(["Match Play", "Stroke Play", "Skins", "Best Ball", "Scramble", "Alternate Shot", "Stableford", "Nassau", "Wolf", "Ryder Cup", "Other"]);
     const [isBeefNight, setIsBeefNight] = useState(false);
+
+    const getLastRoundId = async () => {
+        let rounds = await getRounds();
+        let roundIds = rounds?.map(r => r.id);
+        return Math.max(...roundIds);
+    }
 
     const handleSubmit = async () => {
         // create round
@@ -111,6 +117,12 @@ export default function RoundSetup(props) {
                     <IconButton onClick={handleSubmit} onSubmit={handleSubmit}>
                         <GolfTee style={{fontSize: 50}} color={"success"}/>
                     </IconButton>
+                </Stack>
+                <Divider>OR</Divider>
+                <Stack justifyContent={"left"} direction="row">
+                    <Button onClick={async () => navigate(`/rounds/${await getLastRoundId()}/holes/1`)}>
+                        <Typography color={"primary"}>RESUME LAST ROUND</Typography>
+                    </Button>
                 </Stack>
             </Stack>
         </Box>
