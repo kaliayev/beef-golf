@@ -42,7 +42,7 @@ export default function RoundSetup(props) {
             "golfers": selectedGolfers.map(g => {return {golfer_id: g.id}}),
         })
         // navigate to new round
-        navigate(`/round/${round.id}/hole/1`)
+        navigate(`/rounds/${round.id}/holes/1`)
     }
 
     return (

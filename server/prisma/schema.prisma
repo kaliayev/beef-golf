@@ -127,8 +127,6 @@ model scoreCardHole {
   scoreCard    scoreCard   @relation(fields: [round_id, golfer_id], references: [round_id, golfer_id], onDelete: NoAction, onUpdate: NoAction)
   golfer       golfer      @relation(fields: [golfer_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   round        round       @relation(fields: [round_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  strokeLog    strokeLog[]
-  geoLocation  geoLocation[]
 
   @@id([round_id, golfer_id, hole_id])
 }
@@ -155,14 +153,13 @@ model strokeLog {
   club_id            Int
   stroke_number      Int
   distance           Int?
-  make               Boolean       @default(false)
-  max_strokes_pickup Boolean       @default(false)
-  penalty_stroke     Boolean       @default(false)
+  green              Boolean       @default(false)
+  pickup             Boolean       @default(false)
+  penalty            Boolean       @default(false)
   direction          Int?
   date_created       DateTime
   date_updated       DateTime?
   geoLocation        geoLocation[]
-  scoreCardHole      scoreCardHole @relation(fields: [round_id, golfer_id, hole_id], references: [round_id, golfer_id, hole_id], onDelete: NoAction, onUpdate: NoAction)
   scoreCard          scoreCard     @relation(fields: [round_id, golfer_id], references: [round_id, golfer_id], onDelete: NoAction, onUpdate: NoAction)
   golferClub         golferClub    @relation(fields: [golfer_id, club_id], references: [golfer_id, club_id], onDelete: NoAction, onUpdate: NoAction)
   club               club          @relation(fields: [club_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
@@ -180,15 +177,12 @@ model geoLocation {
   stroke_number    Int
   latitude         Float
   longitude        Float
-  altitude         Float
+  altitude         Float?
   accuracy         Float
-  altitude_accuracy Float
-  heading          Float
-  speed            Float
+  altitude_accuracy Float?
   date_created     DateTime
   date_updated     DateTime?
   strokeLog        strokeLog     @relation(fields: [round_id, golfer_id, hole_id, stroke_number], references: [round_id, golfer_id, hole_id, stroke_number], onDelete: NoAction, onUpdate: NoAction)
-  scoreCardHole    scoreCardHole @relation(fields: [round_id, golfer_id, hole_id], references: [round_id, golfer_id, hole_id], onDelete: NoAction, onUpdate: NoAction)
   scoreCard        scoreCard     @relation(fields: [round_id, golfer_id], references: [round_id, golfer_id], onDelete: NoAction, onUpdate: NoAction)
   hole             hole          @relation(fields: [hole_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   golfer           golfer        @relation(fields: [golfer_id], references: [id], onDelete: NoAction, onUpdate: NoAction)

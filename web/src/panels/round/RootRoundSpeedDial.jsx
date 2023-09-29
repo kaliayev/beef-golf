@@ -1,15 +1,18 @@
 import React from "react";
-import {Outlet, useNavigate, useSearchParams, useSubmit} from "react-router-dom";
+import {Outlet, useNavigate, useParams, useSearchParams, useSubmit} from "react-router-dom";
 import Burger from '@mui/icons-material/LunchDiningTwoTone';
 import Forwards from '@mui/icons-material/RedoTwoTone';
 import Backwards from '@mui/icons-material/UndoTwoTone';
 import Caddy from '@mui/icons-material/PsychologyAltTwoTone';
+import FinishRound from '@mui/icons-material/CheckCircleTwoTone';
 import {Backdrop, Box, SpeedDial, SpeedDialAction} from "@mui/material";
 
 
 export default function RootRoundSpeedDial({auth}) {
     const submit = useSubmit();
     const navigate = useNavigate();
+    const {round_id, hole_id} = useParams();
+    const holeNum = parseInt(hole_id);
     const [searchParams, setSearchParams] = useSearchParams();
     // useAuth
     const [isLoggedIn, {onLogout, onLogin, setIsLoggedIn}] = auth;
@@ -18,9 +21,10 @@ export default function RootRoundSpeedDial({auth}) {
     const handleClose = () => setOpen(false);
 
     const actions = [
-        {icon: <Backwards color={"warning"} fontSize="large"/>, name: 'Last Hole', click: () => {handleClose()}},
-        {icon: <Forwards color={"success"} fontSize="large"/>, name: 'Next Hole', click: () => {handleClose()}},
+        {icon: <Backwards color={"warning"} fontSize="large"/>, name: 'Last Hole', click: () => {handleClose(); navigate(`/rounds/${round_id}/holes/${holeNum - 1}`)}},
+        {icon: <Forwards color={"success"} fontSize="large"/>, name: 'Next Hole', click: () => {handleClose(); navigate(`/rounds/${round_id}/holes/${holeNum + 1}`)}},
         {icon: <Caddy color={"info"} fontSize="large"/>, name: 'Caddy', click: () => {handleClose();}},
+        {icon: <FinishRound color={"success"} fontSize="large"/>, name: 'Finish', click: () => {handleClose();}},
     ];
 
     return (

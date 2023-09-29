@@ -1,6 +1,7 @@
 {
   "short_name": "Beef Golf",
   "name": "Golf with Beef",
+  "permissions": ["geolocation"],
   "icons": [
     {
       "src": "favicon.ico",

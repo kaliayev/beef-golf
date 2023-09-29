@@ -10,7 +10,7 @@ const {getAllCourses, getCourseById, getHoleById} = require("./src/handlers/cour
 const {getAllGolfers, getGolferById} = require("./src/handlers/golfers");
 const {createRound, getRounds, getRoundById} = require("./src/handlers/rounds");
 const {createScoreCardHole} = require("./src/handlers/scoreCards");
-const {createStrokeLog} = require("./src/handlers/strokeLog");
+const {createStrokeLog, getStrokes} = require("./src/handlers/strokeLog");
 
 const log = require('./src/logging/log');
 const constants = require("./constants");
@@ -42,6 +42,7 @@ app.get('/v1/rounds/:id', getRoundById);
 app.post('/v1/rounds/:round_id/golfers/:golfer_id/holes/:hole_id/score', createScoreCardHole);
 // stroke log detail
 app.post('/v1/rounds/:round_id/golfers/:golfer_id/holes/:hole_id/strokes/:stroke_number/log', createStrokeLog);
+app.get('/v1/rounds/:round_id/golfers/:golfer_id/holes/:hole_id/strokes', getStrokes);
 app.listen(port, () => {
     log.info(`Server listening on port ${port}`);
 });

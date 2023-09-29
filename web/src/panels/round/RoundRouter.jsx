@@ -15,7 +15,7 @@ function RoundRouter(auth) {
             //action: roundSetupAction
         },
         {
-            path: "/round/:id/hole/:hole",
+            path: "/rounds/:round_id/holes/:hole_id",
             element: <RootRoundSpeedDial auth={auth}/>,
             children: [
                 {
@@ -30,6 +30,7 @@ function RoundRouter(auth) {
 }
 
 export default function RoundRouterBuilder(props) {
+
     return (
         <RouterProvider router={RoundRouter(props.auth)}>
             {props.children}

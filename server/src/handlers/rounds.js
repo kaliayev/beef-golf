@@ -33,7 +33,15 @@ const getRoundById = async (req, res) => {
             },
             scoreCard: {
                 include: {
-                    golfer: true,
+                    golfer: {
+                        include: {
+                            golferClub: {
+                                include: {
+                                    club: true
+                                }
+                            }
+                        }
+                    },
                     scoreCardHole: true
                 }
             }
