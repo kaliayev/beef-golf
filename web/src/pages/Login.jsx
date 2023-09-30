@@ -8,11 +8,10 @@ import {useState} from "react";
 
 export default function Login({auth}) {
     let [isLoggedIn, {onLogin, setIsLoggedIn}] = auth;
-    const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const handleEnter = (e) => {
         if (e.key === 'Enter') {
-            onLogin(username, password);
+            onLogin(password);
         }
     }
     const codeToMessage = (code) => {
@@ -57,8 +56,8 @@ export default function Login({auth}) {
                                helperText={codeToMessage(401)}/>
                     <Box align="right">
                         <IconButton sx={{width: '33%'}}
-                                    onClick={() => onLogin(username, password)}
-                                    onSubmit={() => onLogin(username, password)}>
+                                    onClick={() => onLogin(password)}
+                                    onSubmit={() => onLogin(password)}>
                             <Golf style={{fontSize: 50}} color={"success"}/>
                         </IconButton>
                     </Box>

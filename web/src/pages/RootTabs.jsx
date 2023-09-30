@@ -1,13 +1,11 @@
 import {AppBar, Box, Stack, Tab, Tabs, Toolbar} from "@mui/material";
 import {useState} from "react";
-import {login, logout} from "../data/login";
+import {login, logout} from "../data/httpClient";
 import GolfTee from '@mui/icons-material/SportsGolfTwoTone';
 import GolfCourse from '@mui/icons-material/GolfCourseTwoTone';
 import Golfer from '@mui/icons-material/PermIdentityTwoTone';
 import Stats from '@mui/icons-material/InsertChartTwoTone';
 import Login from "./Login";
-import RoundSetup from "../panels/round/RoundSetup";
-import HoleEdit from "../panels/round/HoleEdit";
 import RoundRouterBuilder from "../panels/round/RoundRouter";
 
 function CustomTabPanel(props) {
@@ -34,9 +32,9 @@ export default function RootTabs() {
     };
 
     const [isLoggedIn, setIsLoggedIn] = useState(false);
-    const onLogin = async (username, password) => {
+    const onLogin = async (password) => {
         try {
-            await login(username, password);
+            await login(password);
             setIsLoggedIn(true);
         } catch (e) {
             setIsLoggedIn(false);

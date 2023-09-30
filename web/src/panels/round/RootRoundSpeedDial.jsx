@@ -26,7 +26,7 @@ export default function RootRoundSpeedDial({auth}) {
         {icon: <Backwards color={"warning"} fontSize="large"/>, name: 'Last Hole', click: () => {handleClose(); navigate(`/rounds/${round_id}/holes/${lastHoleNum}`)}},
         {icon: <Forwards color={"success"} fontSize="large"/>, name: 'Next Hole', click: () => {handleClose(); navigate(`/rounds/${round_id}/holes/${nextHoleNum}`)}},
         {icon: <Caddy color={"info"} fontSize="large"/>, name: 'Caddy', click: () => {handleClose();}},
-        {icon: <FinishRound color={"success"} fontSize="large"/>, name: 'Finish', click: () => {handleClose();}},
+        {icon: <FinishRound color={"success"} fontSize="large"/>, name: 'Finish', click: () => {handleClose(); navigate('../../../../');}},
     ];
 
     return (

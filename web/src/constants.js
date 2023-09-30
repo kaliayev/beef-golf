@@ -1,6 +1,6 @@
 const Constants = {
-    //server: "https://shark-precious-horribly.ngrok-free.app/v1",
-    server: "http://localhost:8080/v1",
+    server: "https://shark-precious-horribly.ngrok-free.app/v1",
+    //server: "http://localhost:8080/v1",
     authStorageKey: "_beef-golf-auth",
     colours: {
         foreground: "#cccccc",
