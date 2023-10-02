@@ -52,6 +52,7 @@ export default function Login({auth}) {
                     <TextField variant={"outlined"} label={"Password"} type={"password"}
                                onChange={e=> setPassword(e.target.value)}
                                onKeyUp={handleEnter}
+                               autoFocus={true}
                                error={!!codeToMessage(401)}
                                helperText={codeToMessage(401)}/>
                     <Box align="right">

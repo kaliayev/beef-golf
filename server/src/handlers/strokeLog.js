@@ -38,9 +38,6 @@ const createStrokeLog = async (req, res) => {
                 ...connectors,
                 stroke_number,
                 date_created,
-                distance: req.body.distance,
-                green: req.body.green,
-                pickup: req.body.pickup,
                 penalty: req.body.penalty,
                 direction: req.body.direction,
                 club: {

@@ -107,6 +107,7 @@ export default function ShotTracker(props) {
                 golfer_id: selectedGolfer.id,
                 stroke_number: getStrokeNumber(selectedGolferStrokes),
                 club_id: selectedGolferClub.id,
+                penalty: true,
                 geoLocations: []
             })
             setSnackbarMessage(`Penalty Stroke Saved`);
