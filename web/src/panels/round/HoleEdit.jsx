@@ -24,6 +24,7 @@ import {getRound} from "../../data/rounds";
 import {useLoaderData, useNavigate} from "react-router-dom";
 import {objCompare} from "./utils";
 import {createStrokeLog, getGolferStrokes} from "../../data/strokeLog";
+import ShotTracker from "./components/ShotTracker";
 
 let colours = Constants.colours;
 const getPathParams = (request) => {
@@ -33,7 +34,7 @@ const getPathParams = (request) => {
         holeNumber: Number(pathParams[4])
     }
 }
-const getStrokeNumber = (golferStrokes) => {
+export const getStrokeNumber = (golferStrokes) => {
     let strokeNumbers = golferStrokes.map(gs => gs.stroke_number);
     if (strokeNumbers.length === 0) {
         return 1;
@@ -50,16 +51,12 @@ export default function HoleEdit(props) {
     const {round, holeNumber} = useLoaderData();
     const golfers = round.scoreCard.map(s => s.golfer)
     const holeDetails = round.course.hole[holeNumber -1];
-    const [selectedGolfer, setSelectedGolfer] = useState({});
-    const [selectedGolferClubs, setSelectedGolferClubs] = useState([]);
-    const [selectedGolferClub, setSelectedGolferClub] = useState({});
-    const [outcome, setOutcome] = useState('');
-    const [distance, setDistance] = useState(holeDetails.white_distance);
-    const [geoLocations, setGeoLocations] = useState([]);
-    const [currGeolocation, setCurrGeolocation] = useState({});
-    const [isTracking, setIsTracking] = useState(false);
+    const [selectedGolfer, setSelectedGolfer] = useState(golfers[0]);
+    const [selectedGolferClubs, setSelectedGolferClubs] = useState(selectedGolfer?.golferClub || []);
+    const [selectedGolferClub, setSelectedGolferClub] = useState(selectedGolferClubs[-1]?.club || {});
     const [selectedGolferStrokes, setSelectedGolferStrokes] = useState([]);
-    const [error, setError] = useState(null);
+    const [snackbarMessage, setSnackbarMessage] = useState('');
+    const [snackbarSeverity, setSnackbarSeverity] = useState('success'); // "error", "warning", "info", "success"
     const [snackbarOpen, setSnackbarOpen] = useState(false);
 
     const handleSnackbarClose = (event, reason) => {
@@ -79,24 +76,10 @@ export default function HoleEdit(props) {
             <Cancel fontSize="small" />
         </IconButton>
     </Fragment>)
-    const selectTrackingIcon = () => {
-        switch (outcome) {
-            case "Green":
-                return <GolfHole style={{fontSize: 40}} color={"success"}/>
-            case "Penalty":
-                return <Water style={{fontSize: 40}} color={"warning"}/>
-            case "Pickup":
-                return <ErrorIcon style={{fontSize: 40}} color={"error"}/>
-            default:
-                if (isTracking) {
-                    return <GolfTee style={{fontSize: 40}} color={"info"}/>
-                } else {
-                    return <GPS style={{fontSize: 40}} color={"success"}/>
-                }
-        }
-    }
 
-    const handleSetSelectedGolfer = async (event, value) => {
+
+    const handleSetSelectedGolfer = async (event) => {
+        let value = event?.target?.value;
         setSelectedGolfer(value)
         setSelectedGolferClubs(value?.golferClub?.map(gc => gc.club) || [])
         setSelectedGolferClub((value?.golferClub?.length)? value.golferClub[-1]?.club: {})
@@ -108,69 +91,9 @@ export default function HoleEdit(props) {
         }
     }
     useEffect(() => {
-        handleSetSelectedGolfer({}, {})
-        setOutcome('')
+        handleSetSelectedGolfer({})
         setSelectedGolferStrokes([])
     }, [holeNumber])
-
-    const handleTrackingClick = async () => {
-        if (isTracking) {
-            setIsTracking(false);
-            console.log("outcome", outcome)
-            // send stroke data to server
-            try {
-                let stroke = await createStrokeLog({
-                    round_id: round.id,
-                    hole_id: holeDetails.id,
-                    golfer_id: selectedGolfer.id,
-                    stroke_number: getStrokeNumber(selectedGolferStrokes),
-                    club_id: selectedGolferClub.id,
-                    green: outcome === "Green",
-                    penalty: outcome === "Penalty",
-                    pickup: outcome === "Pickup",
-                    geoLocations
-                })
-                // update and clear other details
-                setGeoLocations([]);
-                setSelectedGolferStrokes([...selectedGolferStrokes, stroke]);
-                setOutcome('');
-            } catch (e) {
-                setError("Error Saving Stroke Log");
-                setSnackbarOpen(true);
-            }
-        } else {
-            // should always have a value to start, and resets geolocations to new array
-            setGeoLocations([currGeolocation]);
-            setIsTracking(true);
-        }
-    }
-
-    const calculateDistance = () => {
-
-    }
-    const recommendClub = () => {
-
-    }
-
-    const updateCurrGeolocation = async () => {
-        let geo = await getGeo();
-        if (!(geo === null || geo === undefined || geo === {} || objCompare(geo, currGeolocation))) {
-            console.log("updating geo", geo);
-            if (isTracking) {
-                setGeoLocations([...geoLocations, geo]);
-            }
-            setCurrGeolocation(geo);
-        }
-    }
-    const [timeOnPage, setTimeOnPage] = useState(0);
-    const intervalRef = useRef(); // Add a ref to store the interval id
-    useEffect(() => {
-        updateCurrGeolocation();
-        intervalRef.current = setInterval(() => {
-            setTimeOnPage((t) => t + 5);
-        }, 5000);
-        return () => clearInterval(intervalRef.current);
-    }, [timeOnPage]);
 
     const golferRow = (golfer, index) => {
         return (
@@ -236,84 +159,21 @@ export default function HoleEdit(props) {
                         </Stack>
                     </AccordionDetails>
                 </Accordion>
-
-                <Accordion sx={{backgroundColor: colours.background}}>
-                    <AccordionSummary expandIcon={<ExpandMore color={"secondary"}/>}>
-                        <Typography sx={{ width: '33%', flexShrink: 0 }}>
-                            Tracking
-                        </Typography>
-                        <Typography sx={{ color: 'text.secondary' }}>{selectedGolfer?.name}</Typography>
-                    </AccordionSummary>
-                    <AccordionDetails>
-                        <Stack direction={"column"} spacing={2}>
-                            <Stack sx={{width: '100%'}} direction={'row'} justifyContent={"left"}>
-                                <Typography sx={{color: 'text.secondary' }}>{`Stroke Number: ${getStrokeNumber(selectedGolferStrokes)}`}</Typography>
-                            </Stack>
-                            <Autocomplete
-                                key={holeNumber}
-                                getOptionLabel={(option) => option?.name}
-                                renderInput={(params) => <TextField {...params} label="Golfer" />}
-                                options={golfers}
-                                onChange={handleSetSelectedGolfer}/>
-                            <Stack sx={{alignItems: 'center'}} alignItems='center' justifyContent='space-between' direction={"row"} spacing={2}>
-                            <Autocomplete fullWidth
-                                          key={holeNumber + 1}
-                                          renderInput={(params) => <TextField  {...params} label="Select Club" />}
-                                          getOptionLabel={(option) => option?.name || ''}
-                                          options={selectedGolferClubs}
-                                          onChange={(event, value) => setSelectedGolferClub(value)}
-                            />
-                            <Typography sx={{color: 'text.secondary' }}>OR</Typography>
-                            <Autocomplete fullWidth
-                                          renderInput={(params) => <TextField {...params} label="Select Event" />}
-                                          options={['Green', 'Penalty', 'Pickup']}
-                                          onChange={(event, value) => setOutcome(value)}
-                            />
-                        </Stack>
-                            <Stack justifyContent={"space-between"} direction="row">
-                                <Button>
-                                    <Typography color={"error"}>CANCEL</Typography>
-                                </Button>
-                                <IconButton onClick={handleTrackingClick}>
-                                    {selectTrackingIcon()}
-                                </IconButton>
-                            </Stack>
-                        </Stack>
-                    </AccordionDetails>
-                </Accordion>
-
-                <Accordion sx={{backgroundColor: colours.background}}>
-                    <AccordionSummary expandIcon={<ExpandMore color={"secondary"}/>}>
-                        <Typography sx={{ width: '33%', flexShrink: 0 }}>
-                            {`Caddy`}
-                        </Typography>
-                        <Typography sx={{ color: 'text.secondary' }}>{selectedGolfer?.name}</Typography>
-                    </AccordionSummary>
-                    <AccordionDetails>
-                        <Stack sx={{width: '70%', m:2}}
-                               spacing={2}>
-                            <Autocomplete
-                                getOptionLabel={(option) => option.name}
-                                renderInput={(params) => <TextField {...params} label="Golfer" />}
-                                options={golfers}
-                                onChange={handleSetSelectedGolfer}/>
-                            <Typography sx={{color: 'text.secondary' }}>{`Distance: ${calculateDistance()}`}</Typography>
-                            <Typography sx={{color: 'text.secondary' }}>{`Recommended Club: ${recommendClub()}`}</Typography>
-                        </Stack>
-                    </AccordionDetails>
-                </Accordion>
-                <Box align={'center'}>
-                <Box sx={{width: '70%', backgroundColor: colours.background, borderRadius: 2}} border={2} align='left' >
-                    <pre>{JSON.stringify(currGeolocation, null, 2) }</pre>
-                </Box>
-                </Box>
+                <ShotTracker round={round} holeDetails={holeDetails}
+                             setSnackbarMessage={setSnackbarMessage} setSnackbarSeverity={setSnackbarSeverity} setSnackbarOpen={setSnackbarOpen}
+                             golfers={golfers} selectedGolfer={selectedGolfer} handleSetSelectedGolfer={handleSetSelectedGolfer}
+                             selectedGolferStrokes={selectedGolferStrokes} setSelectedGolferStrokes={setSelectedGolferStrokes}
+                             selectedGolferClubs={selectedGolferClubs} selectedGolferClub={selectedGolferClub} setSelectedGolferClub={setSelectedGolferClub}/>
             </Stack>
+
+
+
             <Snackbar
                 open={snackbarOpen}
                 action={snackbarAction}
                 onClose={handleSnackbarClose}
                 autoHideDuration={5000}>
-                <Alert severity="error" sx={{width: '100%'}} onClose={handleSnackbarClose}> {error} </Alert>
+                <Alert severity={snackbarSeverity} sx={{width: '100%'}} onClose={handleSnackbarClose}> {snackbarMessage} </Alert>
             </Snackbar>
         </Box>
     )

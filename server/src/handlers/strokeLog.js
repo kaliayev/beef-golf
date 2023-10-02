@@ -107,7 +107,52 @@ const getStrokes = async (req, res) => {
         return res.status(500).json({message: e.message});
     }
 }
+
+const deleteStrokeLog = async (req, res) => {
+    try {
+        const round_id = parseInt(req.params.round_id);
+        const golfer_id = parseInt(req.params.golfer_id);
+        const hole_id = parseInt(req.params.hole_id);
+        const stroke_number = parseInt(req.params.stroke_number);
+        const stroke = await prisma.strokeLog.findFirst({
+            where: {
+                round_id,
+                golfer_id,
+                hole_id,
+                stroke_number
+            },
+            include: {
+                geoLocation: true
+            }
+        })
+
+        await prisma.geoLocation.deleteMany({
+            where: {
+                id: {
+                    in: stroke.geoLocation.map(geoLocation => geoLocation.id)
+                }
+            }
+        })
+        await prisma.strokeLog.delete({
+            where: {
+                round_id_golfer_id_hole_id_stroke_number: {
+                    round_id,
+                    golfer_id,
+                    hole_id,
+                    stroke_number
+                }
+            }
+        })
+        return res.status(200).json({stroke});
+
+    } catch (e) {
+        log.error(e)
+        return res.status(500).json({message: e.message});
+    }
+}
+
 module.exports = {
     createStrokeLog,
-    getStrokes
+    getStrokes,
+    deleteStrokeLog
 }

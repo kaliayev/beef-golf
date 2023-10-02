@@ -117,7 +117,7 @@ model scoreCardHole {
   golfer_id    Int
   hole_id      Int
   strokes      Int
-  putts        Int?
+  putts        Int @default(0)
   drops        Int?
   penalties    Int?
   obs          Int?
@@ -152,11 +152,7 @@ model strokeLog {
   hole_id            Int
   club_id            Int
   stroke_number      Int
-  distance           Int?
-  green              Boolean       @default(false)
-  pickup             Boolean       @default(false)
   penalty            Boolean       @default(false)
-  direction          Int?
   date_created       DateTime
   date_updated       DateTime?
   geoLocation        geoLocation[]
@@ -171,6 +167,7 @@ model strokeLog {
 }
 
 model geoLocation {
+  id               Int          @id @default(autoincrement())
   round_id         Int
   golfer_id        Int
   hole_id          Int
@@ -187,6 +184,4 @@ model geoLocation {
   hole             hole          @relation(fields: [hole_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   golfer           golfer        @relation(fields: [golfer_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   round            round         @relation(fields: [round_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-
-  @@id([round_id, golfer_id, hole_id, stroke_number])
 }
