@@ -9,10 +9,10 @@ import {useEffect, useRef, useState} from "react";
 import {createStrokeLog, deleteStrokeLog} from "../../../data/strokeLog";
 import {objCompare, sleep, sortArrayByPropDesc} from "../utils";
 import {getGeo} from "../../../data/geo";
-import GolfTee from "@mui/icons-material/SportsGolfTwoTone";
 import LoadingIcon from '@mui/icons-material/HourglassTopTwoTone';
 import GPS from "@mui/icons-material/GpsFixedTwoTone";
 import dayjs from "dayjs";
+import Water from "@mui/icons-material/PoolTwoTone";
 
 let colours = Constants.colours;
 
@@ -32,10 +32,10 @@ export default function ShotTracker(props) {
         setSnackbarMessage,
         setSnackbarSeverity
     } = props;
-    const holeNumber = holeDetails.hole_number;
     const [geoLocationsBuffer, setGeoLocationsBuffer] = useState([]);
     const [currGeolocation, setCurrGeolocation] = useState({});
     const [isTracking, setIsTracking] = useState(false);
+
     const updateCurrGeolocation = async () => {
         let geo = await getGeo();
         if (!(geo === null || geo === undefined || geo === {} || objCompare(geo, currGeolocation))) {
@@ -99,6 +99,28 @@ export default function ShotTracker(props) {
         geoLoop()
     }
 
+    const handlePenaltyStroke = async () => {
+        try {
+            let stroke = await createStrokeLog({
+                round_id: round.id,
+                hole_id: holeDetails.id,
+                golfer_id: selectedGolfer.id,
+                stroke_number: getStrokeNumber(selectedGolferStrokes),
+                club_id: selectedGolferClub.id,
+                geoLocations: []
+            })
+            setSnackbarMessage(`Penalty Stroke Saved`);
+            setSnackbarSeverity("info");
+            setSnackbarOpen(true);
+            // update and clear other details
+            setSelectedGolferStrokes([...selectedGolferStrokes, stroke]);
+        } catch (e) {
+            setSnackbarMessage("Error Saving Stroke Log");
+            setSnackbarSeverity("error");
+            setSnackbarOpen(true);
+        }
+    }
+
     const handleDeleteLastStroke = async () => {
         if (getStrokeNumber(selectedGolferStrokes) === 1) {
             setSnackbarMessage('No Strokes to Delete');
@@ -144,13 +166,18 @@ export default function ShotTracker(props) {
                 </Stack>
                 <FormControl fullWidth>
                     <InputLabel>Golfer</InputLabel>
-                    <Select value={selectedGolfer || ''} onChange={handleSetSelectedGolfer} label={"Golfer"}>
+                    <Select key={holeDetails.id}
+                            value={selectedGolfer}
+                            onChange={handleSetSelectedGolfer}
+                            label={"Golfer"}>
                         {golfers.map(golfer => <MenuItem key={golfer.id} value={golfer}>{golfer.name}</MenuItem>)}
                     </Select>
                 </FormControl>
                 <FormControl fullWidth>
                     <InputLabel>Club</InputLabel>
-                    <Select value={selectedGolferClub || ''} onChange={(e) => setSelectedGolferClub(e.target.value)}
+                    <Select key={holeDetails.id}
+                            value={selectedGolferClub || ''}
+                            onChange={(e) => setSelectedGolferClub(e.target.value)}
                             label={"Club"}>
                         {sortArrayByPropDesc(selectedGolferClubs, 'id').map(club => <MenuItem key={club.id} value={club}>{club.name}</MenuItem>)}
                     </Select>
@@ -159,6 +186,9 @@ export default function ShotTracker(props) {
                     <Button onClick={handleDeleteLastStroke}>
                         <Typography color={"error"}>UNDO</Typography>
                     </Button>
+                    <IconButton onClick={handlePenaltyStroke}>
+                        <Water style={{fontSize: 40}} color={"warning"}/>
+                    </IconButton>
                     <IconButton onClick={handleTrackingClick}>
                         {selectTrackingIcon()}
                     </IconButton>

@@ -9,7 +9,7 @@ const login = require("./src/handlers/login");
 const {getAllCourses, getCourseById, getHoleById} = require("./src/handlers/courses");
 const {getAllGolfers, getGolferById} = require("./src/handlers/golfers");
 const {createRound, getRounds, getRoundById} = require("./src/handlers/rounds");
-const {createScoreCardHole} = require("./src/handlers/scoreCards");
+const {createScoreCardHole, updateScoreCardHole} = require("./src/handlers/scoreCards");
 const {createStrokeLog, getStrokes, deleteStrokeLog} = require("./src/handlers/strokeLog");
 
 const log = require('./src/logging/log');
@@ -40,6 +40,7 @@ app.post('/v1/rounds', createRound);
 app.get('/v1/rounds/:id', getRoundById);
 // scorecard detail
 app.post('/v1/rounds/:round_id/golfers/:golfer_id/holes/:hole_id/score', createScoreCardHole);
+app.put('/v1/rounds/:round_id/golfers/:golfer_id/holes/:hole_id/score', updateScoreCardHole);
 // stroke log detail
 app.post('/v1/rounds/:round_id/golfers/:golfer_id/holes/:hole_id/strokes/:stroke_number/log', createStrokeLog);
 app.get('/v1/rounds/:round_id/golfers/:golfer_id/holes/:hole_id/strokes', getStrokes);

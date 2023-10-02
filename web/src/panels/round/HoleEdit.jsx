@@ -1,30 +1,20 @@
 import {
     Accordion,
     AccordionDetails,
-    AccordionSummary, Alert, Autocomplete,
-    Box, Button, Divider,
-    Drawer,
-    Fab, IconButton, Snackbar,
+    AccordionSummary, Alert,
+    Box, Button,
+    IconButton, Snackbar,
     Stack,
-    TextField,
     Typography
 } from "@mui/material";
 import {Cancel, ExpandMore} from "@mui/icons-material";
 import Constants from "../../constants";
-import {Fragment, useEffect, useRef, useState} from "react";
-import Caddy from '@mui/icons-material/PsychologyAltTwoTone';
-import Water from '@mui/icons-material/PoolTwoTone';
-import GolfHole from '@mui/icons-material/GolfCourseTwoTone';
-import GolfTee from '@mui/icons-material/SportsGolfTwoTone';
-import GPS from '@mui/icons-material/GpsFixedTwoTone';
-import ErrorIcon from '@mui/icons-material/ErrorTwoTone';
-import {getGeo} from "../../data/geo";
-import {getCourse} from "../../data/courses";
+import {Fragment, useEffect, useState} from "react";
 import {getRound} from "../../data/rounds";
-import {useLoaderData, useNavigate} from "react-router-dom";
-import {objCompare} from "./utils";
-import {createStrokeLog, getGolferStrokes} from "../../data/strokeLog";
+import {useLoaderData} from "react-router-dom";
+import {getGolferStrokes} from "../../data/strokeLog";
 import ShotTracker from "./components/ShotTracker";
+import ScoreCardEntry from "./components/ScoreCardEntry";
 
 let colours = Constants.colours;
 const getPathParams = (request) => {
@@ -45,6 +35,7 @@ export const getStrokeNumber = (golferStrokes) => {
 export async function loader({request}) {
     const {roundId, holeNumber} = getPathParams(request);
     const round = await getRound(roundId);
+    console.log("round", round)
     return {round, holeNumber};
 }
 export default function HoleEdit(props) {
@@ -95,24 +86,6 @@ export default function HoleEdit(props) {
         setSelectedGolferStrokes([])
     }, [holeNumber])
 
-    const golferRow = (golfer, index) => {
-        return (
-            <Stack spacing={2} key={index}>
-                <Divider><Typography>{`${golfer} (${'+' + index})`}</Typography></Divider>
-                <Stack direction={"row"} spacing={2} sx={{alignItems: 'center'}}>
-                    <TextField inputProps={{min: 0, style: { textAlign: 'center', fontSize: 15 }}} style={{fontSize: 15}} label={"Score"} variant={"outlined"} type={"number"} defaultValue={holeDetails.par}/>
-                    <TextField inputProps={{min: 0, style: { textAlign: 'center', fontSize: 15 }}} label={"Putts"} variant={"outlined"} type={"number"} defaultValue={2}/>
-                    <TextField inputProps={{min: 0, style: { textAlign: 'center', fontSize: 15 }}} label={"Penalties"} variant={"outlined"} type={"number"} defaultValue={0}/>
-                </Stack>
-                <Stack direction={"row"} spacing={2} sx={{alignItems: 'center'}}>
-                    <Typography sx={{color: 'text.secondary' }}>{`Net: ${holeDetails.par}`}</Typography>
-                    <Typography sx={{color: 'text.secondary' }}>{`Gross: ${holeDetails.par}`}</Typography>
-                    <Typography sx={{color: 'text.secondary' }}>{`Match: ${holeDetails.par}`}</Typography>
-                </Stack>
-            </Stack>
-        )
-    }
-
     return (
         <Box sx={{
             display: 'flex',
@@ -145,28 +118,16 @@ export default function HoleEdit(props) {
                         </Box>
                     </AccordionDetails>
                 </Accordion>
-                <Accordion sx={{backgroundColor: colours.background}}>
-                    <AccordionSummary expandIcon={<ExpandMore color={"secondary"}/>}>
-                        <Typography sx={{ width: '33%', flexShrink: 0 }}>
-                            {`Golfers`}
-                        </Typography>
-                        <Typography sx={{ color: 'text.secondary' }}>{golfers.map(g => g.name).join(', ')}</Typography>
-                    </AccordionSummary>
 
-                    <AccordionDetails>
-                        <Stack direction={"column"} spacing={2}>
-                            {golfers.map((golfer, index) => golferRow(golfer.name, index))}
-                        </Stack>
-                    </AccordionDetails>
-                </Accordion>
+                <ScoreCardEntry golfers={golfers} holeDetails={holeDetails} round={round}
+                                setSnackbarMessage={setSnackbarMessage} setSnackbarSeverity={setSnackbarSeverity} setSnackbarOpen={setSnackbarOpen}/>
+
                 <ShotTracker round={round} holeDetails={holeDetails}
                              setSnackbarMessage={setSnackbarMessage} setSnackbarSeverity={setSnackbarSeverity} setSnackbarOpen={setSnackbarOpen}
                              golfers={golfers} selectedGolfer={selectedGolfer} handleSetSelectedGolfer={handleSetSelectedGolfer}
                              selectedGolferStrokes={selectedGolferStrokes} setSelectedGolferStrokes={setSelectedGolferStrokes}
                              selectedGolferClubs={selectedGolferClubs} selectedGolferClub={selectedGolferClub} setSelectedGolferClub={setSelectedGolferClub}/>
             </Stack>
-
-
 
             <Snackbar
                 open={snackbarOpen}
